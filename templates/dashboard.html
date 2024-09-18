@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Welcome, {{ student.username }}!</h2>
+    <p>Your current Elo rating: 
+    {% if student.elo_rating is not none %}
+        {{ student.elo_rating|round(2) }}
+    {% else %}
+        Not available
+    {% endif %}
+    </p>
+    <a href="{{ url_for('start_exam') }}" class="btn">Start New Exam</a>
+</div>
+
+<div class="card">
+    <h3>Exam History</h3>
+    {% if exam_attempts %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Score</th>
+                    <th>Elo Change</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for attempt in exam_attempts %}
+                <tr>
+                    <td>{{ attempt.start_time.strftime('%Y-%m-%d %H:%M') if attempt.start_time else 'N/A' }}</td>
+                    <td>
+                    {% if attempt.score is not none %}
+                        {{ attempt.score|round(2) }}%
+                    {% else %}
+                        N/A
+                    {% endif %}
+                    </td>
+                    <td>
+                    {% if attempt.elo_rating_change is not none %}
+                        {{ attempt.elo_rating_change|round(2) }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>You haven't taken any exams yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

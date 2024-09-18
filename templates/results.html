@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Exam Results - {{ super() }}{% endblock %}
+
+{% block header %}Exam Results{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Student: {{ student.username }}</h2>
+    <p>Initial Elo Rating: {{ initial_elo }}</p>
+    <p>Final Elo Rating: {{ student.elo_rating }}</p>
+    <p>Elo Rating Change: {{ student.elo_rating - initial_elo }}</p>
+    <p>Score: {{ score }}%</p>
+    <p>Correct Answers: {{ correct_answers }} out of {{ total_questions }}</p>
+</div>
+
+<div class="card">
+    <h2>Question Details</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Question</th>
+                <th>Correct Option</th>
+                <th>Selected Option</th>
+                <th>Result</th>
+                <th>Old Question Rating</th>
+                <th>New Question Rating</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for question in question_details %}
+            <tr>
+                <td>{{ question.statement }}</td>
+                <td>{{ question.correct_option }}</td>
+                <td>{{ question.selected_option }}</td>
+                <td>{% if question.is_correct %}Correct{% else %}Incorrect{% endif %}</td>
+                <td>{{ question.old_rating }}</td>
+                <td>{{ question.new_rating }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<a href="{{ url_for('index') }}" class="btn">Back to Home</a>
+{% endblock %}

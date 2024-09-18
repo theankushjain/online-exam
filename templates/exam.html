@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Exam - {{ super() }}{% endblock %}
+
+{% block header %}Adaptive Online Exam{% endblock %}
+
+{% block extra_head %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="card" id="exam-container">
+    <h2>Question <span id="question-number">{{ question_number }}</span> of 10</h2>
+    <input type="hidden" id="question-id" name="question_id" value="{{ question.id }}">
+    <h3 id="question-statement">{{ question.statement }}</h3>
+    <div class="radio-group">
+        <label><input type="radio" name="option" value="1"> <span id="option-1">{{ question.option_1 }}</span></label><br>
+        <label><input type="radio" name="option" value="2"> <span id="option-2">{{ question.option_2 }}</span></label><br>
+        <label><input type="radio" name="option" value="3"> <span id="option-3">{{ question.option_3 }}</span></label><br>
+        <label><input type="radio" name="option" value="4"> <span id="option-4">{{ question.option_4 }}</span></label>
+    </div>
+    <div>
+        <label for="difficulty">Difficulty:</label>
+        <select name="difficulty" id="difficulty">
+            <option value="easy">Easy</option>
+            <option value="moderate" selected>Moderate</option>
+            <option value="difficult">Difficult</option>
+        </select>
+    </div>
+    <button onclick="submitAnswer()" class="btn">Submit Answer</button>
+</div>
+<p id="previous-question-update"></p>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let startTime;
+    
+    function startTimer() {
+        startTime = new Date().getTime();
+    }
+
+    function submitAnswer() {
+        const endTime = new Date().getTime();
+        const timeTaken = (endTime - startTime) / 1000;
+        const questionId = $('#question-id').val();
+        const selectedOption = $('input[name="option"]:checked').val();
+        const difficulty = $('select[name="difficulty"]').val();
+        
+        $.ajax({
+            url: '/submit_answer',
+            method: 'POST',
+            data: {
+                question_id: questionId,
+                selected_option: selectedOption,
+                time_taken: timeTaken,
+                difficulty_feedback: difficulty
+            },
+            success: function(response) {
+                if (response.redirect) {
+                    window.location.href = response.redirect;
+                } else if (response.next_question) {
+                    updateQuestion(response.next_question, response.question_number);
+                    $('#previous-question-update').text(`Previous question rating changed from ${response.previous_question_update.old_rating.toFixed(2)} to ${response.previous_question_update.new_rating.toFixed(2)}`);
+                } else {
+                    $('#exam-container').html('<h2>Exam Completed</h2><p>Thank you for taking the exam.</p>');
+                }
+            }
+        });
+    }
+
+    function updateQuestion(question, questionNumber) {
+        $('#question-number').text(questionNumber);
+        $('#question-id').val(question.id);
+        $('#question-statement').text(question.statement);
+        $('#option-1').text(question.option_1);
+        $('#option-2').text(question.option_2);
+        $('#option-3').text(question.option_3);
+        $('#option-4').text(question.option_4);
+        $('input[name="option"]').prop('checked', false);
+        $('select[name="difficulty"]').val('moderate');
+        startTimer();
+    }
+
+    $(document).ready(function() {
+        startTimer();
+    });
+</script>
+{% endblock %}

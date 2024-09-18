@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h2>Welcome to the Adaptive Online Exam System</h2>
+    <p>This system provides an adaptive testing experience based on your performance.</p>
+    <a href="{{ url_for('login') }}" class="btn">Login to Start Exam</a>
+</div>
+{% endblock %}
